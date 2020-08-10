@@ -14,6 +14,16 @@ def deploy(
     host: str = "0.0.0.0",
     port: int = 8000
 ) -> None:
+    '''
+    Main entrypoint of the library. This will start a FastAPI app which serves
+    the model
+
+    model: a PyTorch model which subclasses nn.Module and is callable
+    pre: Function or list of functions which will be applied to the input
+    post: Function or list of functions which will be applied to the output
+    host: The address for serving the model
+    port: The port for serving the model
+    '''
     register_model(model)
     if pre:
         if isinstance(pre, Sequence):
