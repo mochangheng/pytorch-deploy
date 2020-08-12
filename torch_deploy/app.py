@@ -1,4 +1,4 @@
-from typing import Callable, List
+from typing import Callable, List, Dict, Union
 
 from fastapi import FastAPI
 from pydantic import BaseModel
@@ -14,7 +14,7 @@ post = []
 
 class ModelInput(BaseModel):
     '''Pydantic Model to receive parameters for the /predict endpoint'''
-    array: List
+    inputs: Union[List, Dict]
 
 def register_model(new_model: nn.Module) -> None:
     '''Set global variable model'''
@@ -41,7 +41,7 @@ def predict(model_input: ModelInput):
     '''
     View function handling the main /predict endpoint
     '''
-    inp = model_input.array
+    inp = model_input.inputs
     # Apply all preprocessing functions
     for f in pre:
         inp = f(inp)
@@ -55,6 +55,6 @@ def predict(model_input: ModelInput):
         output = f(output)
 
     # If torch tensor or numpy array, transform to list so we can pass it back
-    if isinstance(output, (np.array, torch.Tensor)):
+    if isinstance(output, (np.ndarray, torch.Tensor)):
         output = output.tolist()
     return {"output": output}
