@@ -12,7 +12,10 @@ def deploy(
     pre: Union[List[Callable], Callable] = None,
     post: Union[List[Callable], Callable] = None,
     host: str = "0.0.0.0",
-    port: int = 8000
+    port: int = 8000,
+    ssl_keyfile: str = None,
+    ssl_certfile: str = None,
+    ssl_ca_certs: str = None,
 ) -> None:
     '''
     Main entrypoint of the library. This will start a FastAPI app which serves
@@ -36,5 +39,13 @@ def deploy(
         else:
             register_post([post])
 
-    uvicorn.run("torch_deploy.app:app", host=host, port=port)
+    kwargs = {
+        "host": host,
+        "port": port,
+        "ssl_keyfile": ssl_keyfile,
+        "ssl_certfile": ssl_certfile,
+        "ssl_ca_certs": ssl_ca_certs
+    }
+
+    uvicorn.run("torch_deploy.app:app", **kwargs)
     
