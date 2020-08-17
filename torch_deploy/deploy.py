@@ -12,7 +12,8 @@ def deploy(
     pre: Union[List[Callable], Callable] = None,
     post: Union[List[Callable], Callable] = None,
     host: str = "0.0.0.0",
-    port: int = 8000
+    port: int = 8000,
+    logfile: str = None
 ) -> None:
     '''
     Main entrypoint of the library. This will start a FastAPI app which serves
