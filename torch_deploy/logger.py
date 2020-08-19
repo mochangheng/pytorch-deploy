@@ -2,7 +2,7 @@ class Logger():
     '''
     Logs information about model progress into a file
     '''
-    def __init__(self, filename):
+    def __init__(self, filename=None):
         if filename is None:
             self.f = None
         else:
@@ -14,7 +14,7 @@ class Logger():
         if self.f is not None:
             self.f.write(f'{message}\n')
     
-    def close(self)
+    def close(self):
         ''' Closes the file, instance is invalid after running this ''' 
         if self.f is not None:
             self.f.close()

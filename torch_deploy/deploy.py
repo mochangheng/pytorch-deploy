@@ -5,7 +5,7 @@ import importlib
 import uvicorn
 import torch.nn as nn
 
-from .app import register_model, register_pre, register_post
+from .app import register_model, register_pre, register_post, create_logger
 
 def deploy(
     model: nn.Module,
@@ -36,6 +36,7 @@ def deploy(
             register_post(list(post))
         else:
             register_post([post])
+    create_logger(logfile)
 
     uvicorn.run("torch_deploy.app:app", host=host, port=port)
     
