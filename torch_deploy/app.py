@@ -1,16 +1,21 @@
 from typing import Callable, List, Dict, Union
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from pydantic import BaseModel
+from datetime import datetime
 import numpy as np
 import torch
 import torch.nn as nn
+import sys
 
+from .logger import Logger
 
 app = FastAPI()
 model = None
 pre = []
 post = []
+logger = None
+
 
 class ModelInput(BaseModel):
     '''Pydantic Model to receive parameters for the /predict endpoint'''
@@ -31,17 +36,23 @@ def register_post(new_post: List[Callable]) -> None:
     global post
     post = list(new_post)
 
+def create_logger(log_file: str) -> None:
+    global logger
+    logger = Logger(log_file)
+
 @app.get("/")
 def root():
     # For testing/debugging
     return {"text": "Hello World!"}
 
 @app.post("/predict")
-def predict(model_input: ModelInput):
+def predict(model_input: ModelInput, request: Request):
     '''
     View function handling the main /predict endpoint
     '''
+    client_host = request.client.host
     inp = model_input.inputs
+    logger.log(f'[{datetime.now()}] Received input of size {sys.getsizeof(inp)} from {client_host}')
     # Apply all preprocessing functions
     for f in pre:
         inp = f(inp)

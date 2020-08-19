@@ -5,14 +5,15 @@ import importlib
 import uvicorn
 import torch.nn as nn
 
-from .app import register_model, register_pre, register_post
+from .app import register_model, register_pre, register_post, create_logger
 
 def deploy(
     model: nn.Module,
     pre: Union[List[Callable], Callable] = None,
     post: Union[List[Callable], Callable] = None,
     host: str = "0.0.0.0",
-    port: int = 8000
+    port: int = 8000,
+    logfile: str = None
 ) -> None:
     '''
     Main entrypoint of the library. This will start a FastAPI app which serves
@@ -35,6 +36,7 @@ def deploy(
             register_post(list(post))
         else:
             register_post([post])
+    create_logger(logfile)
 
     uvicorn.run("torch_deploy.app:app", host=host, port=port)
     
