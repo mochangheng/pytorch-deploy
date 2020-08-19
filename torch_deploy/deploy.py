@@ -1,4 +1,4 @@
-from typing import Callable, List, Union
+from typing import Callable, List, Union, Optional
 from collections.abc import Sequence
 import importlib
 
