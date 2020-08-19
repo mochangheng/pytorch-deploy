@@ -5,7 +5,7 @@ import importlib
 import uvicorn
 import torch.nn as nn
 
-from .app import register_model, register_pre, register_post
+from .app import register_model, register_pre, register_post, create_logger
 
 def deploy(
     model: nn.Module,
@@ -16,6 +16,7 @@ def deploy(
     ssl_keyfile: str = None,
     ssl_certfile: str = None,
     ssl_ca_certs: str = None,
+    logfile: str = None
 ) -> None:
     '''
     Main entrypoint of the library. This will start a FastAPI app which serves
@@ -38,6 +39,7 @@ def deploy(
             register_post(list(post))
         else:
             register_post([post])
+    create_logger(logfile)
 
     kwargs = {
         "host": host,

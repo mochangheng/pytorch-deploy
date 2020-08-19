@@ -1,18 +1,23 @@
 from typing import Callable, List, Dict, Union
 
 from PIL import Image
-from fastapi import FastAPI, UploadFile, File
+from fastapi import FastAPI, UploadFile, File, Request
 from pydantic import BaseModel
+from datetime import datetime
 import numpy as np
 import torch
 import torch.nn as nn
 from torchvision import transforms
+import sys
 
+from .logger import Logger
 
 app = FastAPI()
 model = None
 pre = []
 post = []
+logger = None
+
 
 class ModelInput(BaseModel):
     '''Pydantic Model to receive parameters for the /predict endpoint'''
@@ -52,17 +57,23 @@ def run_model(inp):
     
     return output
 
+def create_logger(log_file: str) -> None:
+    global logger
+    logger = Logger(log_file)
+
 @app.get("/")
 def root():
     # For testing/debugging
-    return {"message": "Hello World!"}
+    return {"text": "Hello World!"}
 
 @app.post("/predict")
-def predict(model_input: ModelInput):
+def predict(model_input: ModelInput, request: Request):
     '''
     View function handling the main /predict endpoint
     '''
     inp = model_input.inputs
+    client_host = request.client.host
+    logger.log(f'[{datetime.now()}] Received input of size {sys.getsizeof(inp)} from {client_host}')
     output = run_model(inp)
     return {"output": output}
 
