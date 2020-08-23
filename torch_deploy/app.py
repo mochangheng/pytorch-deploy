@@ -74,8 +74,7 @@ def run_model(inp):
         inp = f(inp)
     
     # Pass input through model
-    tensor = torch.tensor(inp)
-    output = inference_fn(tensor)
+    output = inference_fn(inp)
 
     # Apply all postprocessing functions
     for f in post:
@@ -96,6 +95,11 @@ def root():
 def predict(model_input: ModelInput, request: Request):
     '''
     View function handling the main /predict endpoint
+    Input: Expect to receive an application/json body. The value of the "inputs" field
+           will be used as the input that will be passed to the model 
+           and should be a list or a dict.
+    Output: The output of the model after being run through the postprocessing
+            functions.
     '''
     inp = model_input.inputs
 
@@ -107,7 +111,15 @@ def predict(model_input: ModelInput, request: Request):
     return {"output": output}
 
 @app.post("/predict_image")
-def predict_file(request: Request, file: UploadFile = File(...)):
+def predict_image(request: Request, file: UploadFile = File(...)):
+    '''
+    View function handling the /predict_image endpoint
+    Input: Expect to receive a  body. The value of the "inputs" field
+           will be used as the input that will be passed to the model 
+           and should be a list or a dict.
+    Output: The output of the model after being run through the postprocessing
+            functions.
+    '''
     im = Image.open(file.file)
     inp = transforms.ToTensor()(im)
 
