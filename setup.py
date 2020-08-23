@@ -21,6 +21,6 @@ setuptools.setup(
     install_requires=[
         "uvicorn",
         "fastapi"
-    ]
+    ],
     python_requires='>=3.6',
 )
