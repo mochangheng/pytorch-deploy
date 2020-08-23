@@ -1,18 +1,70 @@
-# pytorch-deploy
+# torch-deploy
 
 ## Usage
+Deploying a pretrained ResNet-18:
 ```
+import torch
+import torchvision.models as models
 from torch_deploy import deploy
-deploy(your_model)
+
+resnet18 = models.resnet18(pretrained=True)
+resnet18.eval()
+deploy(resnet18, pre=torch.tensor)
 ```
 
-## deploy Function
-`deploy(model: nn.Module,
+The default host and port is 0.0.0.0:8000.
+
+## Endpoints
+
+### /predict
+Request body: application/json <br>
+Response body: application/json
+
+Here's an example of how to use to use the /predict endpoint.
+
+```
+import requests
+from PIL import Image
+import numpy as np
+from torchvision import transforms
+
+im = Image.open('palm.jpg')
+resize = transforms.Resize(224)
+to_tensor = transforms.ToTensor()
+normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                 std=[0.229, 0.224, 0.225])
+tensor = normalize(to_tensor(resize(im))).unsqueeze(0)
+body = {"inputs": tensor.tolist()}
+r = requests.post("http://127.0.0.1:8000/predict", json=body)
+response = r.json()
+output = np.array(response["output"])
+```
+
+**Note** that you need to send the model input in the request JSON body under the field "inputs".
+If you want to send a tensor or a numpy array in the request, you need to turn it into a list first.
+
+The output of the model will be in the response JSON body under the "output" field.
+
+Sample response format:
+```
+response = {"output": (your numpy array as a list here)}
+```
+
+## Documentation
+```
+torch_deploy.deploy(
+    model: nn.Module,
     pre: Union[List[Callable], Callable] = None,
     post: Union[List[Callable], Callable] = None,
     host: str = "0.0.0.0",
     port: int = 8000,
-    logfile: str = None)`
+    ssl_keyfile: str = None,
+    ssl_certfile: str = None,
+    ssl_ca_certs: str = None,
+    logdir: str = "./deploy_logs/",
+    inference_fn: str = None
+)
+```
 
 Easily converts a pytorch model to API for production usage.
 
@@ -21,7 +73,9 @@ Easily converts a pytorch model to API for production usage.
 - `post`: Function or list of functions applied to model output before being sent as a response.
 - `host`: The address for serving the model.
 - `port`: The port for serving the model.
-- `logfile`: filename to create a file that stores date, ip address, and size of input for each access of the API. If `None`, no file will be created.
+- `ssl_keyfile`, `ssl_certfile`, `ssl_ca_certs`: SSL configurations that are passed to uvicorn
+- `logfile`: Filename to create a file that stores date, ip address, and size of input for each access of the API. If `None`, no file will be created.
+- `inference_fn`: Name of the method of the model that should be called for the inputs. If `None`, the model itself will be called (If `model` is a `nn.Module` then it's equivalent to calling `model.forward(inputs)`).
 
 ## Sample Response Format
 
