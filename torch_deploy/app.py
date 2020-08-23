@@ -1,4 +1,8 @@
 from typing import Callable, List, Dict, Union
+import atexit
+from collections.abc import Sequence
+from copy import deepcopy
+import os
 
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Request
@@ -13,30 +17,56 @@ import sys
 from .logger import Logger
 
 app = FastAPI()
-model = None
+config = None
+inference_fn = None
 pre = []
 post = []
 logger = None
+
+@atexit.register
+def cleanup():
+    if logger is not None:
+        logger.close()
 
 
 class ModelInput(BaseModel):
     '''Pydantic Model to receive parameters for the /predict endpoint'''
     inputs: Union[List, Dict]
 
-def register_model(new_model: nn.Module) -> None:
-    '''Set global variable model'''
-    global model
-    model = new_model
+def setup(my_config):
+    '''Initialize the global variables'''
+    global inference_fn, pre, post, logger, config
+    config = deepcopy(my_config)
 
-def register_pre(new_pre: List[Callable]) -> None:
-    '''Set global variable pre'''
-    global pre
-    pre = list(new_pre)
+    # Make log directory if it doesn't exist
+    my_logdir = config["logdir"]
+    if not os.path.isdir(my_logdir):
+        os.mkdir(my_logdir)
 
-def register_post(new_post: List[Callable]) -> None:
-    '''Set global variable post'''
-    global post
-    post = list(new_post)
+    # Init logger
+    logger = Logger(os.path.join(my_logdir, "logfile"))
+
+    # Init inference_fn
+    model = config["model"]
+    if config["inference_fn"] is not None:
+        inference_fn = getattr(model, config["inference_fn"])
+    else:
+        inference_fn = model
+
+    # Init preprocessing and postprocessing functions
+    my_pre = config["pre"]
+    my_post = config["post"]
+    if my_pre:
+        if isinstance(my_pre, Sequence):
+            pre = list(my_pre)
+        else:
+            pre = [my_pre]
+    if my_post:
+        if isinstance(my_post, Sequence):
+            post = list(my_post)
+        else:
+            post = [my_post]
+
 
 def run_model(inp):
     # Apply all preprocessing functions
@@ -44,8 +74,7 @@ def run_model(inp):
         inp = f(inp)
     
     # Pass input through model
-    tensor = torch.tensor(inp)
-    output = model(tensor)
+    output = inference_fn(inp)
 
     # Apply all postprocessing functions
     for f in post:
@@ -57,10 +86,6 @@ def run_model(inp):
     
     return output
 
-def create_logger(log_file: str) -> None:
-    global logger
-    logger = Logger(log_file)
-
 @app.get("/")
 def root():
     # For testing/debugging
@@ -70,17 +95,39 @@ def root():
 def predict(model_input: ModelInput, request: Request):
     '''
     View function handling the main /predict endpoint
+    Input: Expect to receive an application/json body. The value of the "inputs" field
+           will be used as the input that will be passed to the model 
+           and should be a list or a dict.
+    Output: The output of the model after being run through the postprocessing
+            functions.
     '''
     inp = model_input.inputs
+
+    # Logging
     client_host = request.client.host
     logger.log(f'[{datetime.now()}] Received input of size {sys.getsizeof(inp)} from {client_host}')
+
     output = run_model(inp)
     return {"output": output}
 
 @app.post("/predict_image")
-def predict_file(file: UploadFile = File(...)):
+def predict_image(request: Request, file: UploadFile = File(...)):
+    '''
+    View function handling the /predict_image endpoint
+    Input: Expect to receive a  body. The value of the "inputs" field
+           will be used as the input that will be passed to the model 
+           and should be a list or a dict.
+    Output: The output of the model after being run through the postprocessing
+            functions.
+    '''
     im = Image.open(file.file)
     inp = transforms.ToTensor()(im)
+
+    # Logging
+    client_host = request.client.host
+    logger.log(f'[{datetime.now()}] Received input of size {sys.getsizeof(inp)} from {client_host}')
+
+    # Change the shape so it fits Conv2d
     inp = torch.unsqueeze(inp, 0)
     output = run_model(inp)
     return {"output": output}

@@ -1,11 +1,10 @@
 from typing import Callable, List, Union, Optional
-from collections.abc import Sequence
 import importlib
 
 import uvicorn
 import torch.nn as nn
 
-from .app import register_model, register_pre, register_post, create_logger
+from .app import setup
 
 def deploy(
     model: nn.Module,
@@ -16,7 +15,8 @@ def deploy(
     ssl_keyfile: str = None,
     ssl_certfile: str = None,
     ssl_ca_certs: str = None,
-    logfile: str = None
+    logdir: str = "./deploy_logs/",
+    inference_fn: str = None
 ) -> None:
     '''
     Main entrypoint of the library. This will start a FastAPI app which serves
@@ -28,18 +28,15 @@ def deploy(
     host: The address for serving the model
     port: The port for serving the model
     '''
-    register_model(model)
-    if pre:
-        if isinstance(pre, Sequence):
-            register_pre(list(pre))
-        else:
-            register_pre([pre])
-    if post:
-        if isinstance(post, Sequence):
-            register_post(list(post))
-        else:
-            register_post([post])
-    create_logger(logfile)
+    config = {
+        "model": model,
+        "pre": pre,
+        "post": post,
+        "logdir": logdir,
+        "inference_fn": inference_fn
+    }
+
+    setup(config)
 
     kwargs = {
         "host": host,
