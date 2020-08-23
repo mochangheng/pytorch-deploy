@@ -9,8 +9,13 @@ import torch
 import torch.nn as nn
 from torchvision import transforms
 import sys
+import requests
 
 from .logger import Logger
+from .simple_login import login
+from getpass import getpass
+from fastapi import Depends, FastAPI, HTTPException, status
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
 
 app = FastAPI()
 model = None
@@ -64,6 +69,18 @@ def create_logger(log_file: str) -> None:
 @app.get("/")
 def root():
     # For testing/debugging
+    # Sending post request to login function in simple_login
+    username = input("Enter your username: ")
+    password = getpass("Enter your password: ")
+    params = {'grant_type': '', 
+              'username': username, 
+              'password': password, 
+              'scope': '', 
+              'client_id': '', 
+              'client_secret': ''}
+    headers = {'Content-Type': 'application/x-www-form-urlencoded'}
+    r = requests.post("http://127.0.0.1:8000/token", params=params, headers=headers)
+    print(r.text)
     return {"text": "Hello World!"}
 
 @app.post("/predict")
