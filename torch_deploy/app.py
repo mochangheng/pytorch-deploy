@@ -6,12 +6,11 @@ import os
 
 from PIL import Image
 from fastapi import FastAPI, UploadFile, File, Request
+from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from datetime import datetime
 import numpy as np
 import torch
-import torch.nn as nn
-from torchvision import transforms
 import sys
 
 from .logger import Logger
@@ -22,6 +21,8 @@ inference_fn = None
 pre = []
 post = []
 logger = None
+
+templates = Jinja2Templates(directory="torch_deploy/templates")
 
 @atexit.register
 def cleanup():
@@ -110,6 +111,10 @@ def predict(model_input: ModelInput, request: Request):
     output = run_model(inp)
     return {"output": output}
 
+@app.get("/predict_image")
+def upload_image(request: Request):
+    return templates.TemplateResponse("upload.html", {"request": request})
+
 @app.post("/predict_image")
 def predict_image(request: Request, file: UploadFile = File(...)):
     '''
@@ -126,6 +131,6 @@ def predict_image(request: Request, file: UploadFile = File(...)):
     client_host = request.client.host
     logger.log(f'[{datetime.now()}] Received input of size {sys.getsizeof(inp)} from {client_host}')
 
-    # Change the shape so it fits Conv2d
     output = run_model(inp)
     return {"output": output}
+        

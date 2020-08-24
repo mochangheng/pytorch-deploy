@@ -10,7 +10,7 @@ You also have to install `torch` and `torchvision`. You can do so [here](https:/
 
 ## Usage
 Deploying a pretrained ResNet-18:
-```
+```python
 import torch
 import torchvision.models as models
 from torch_deploy import deploy
@@ -30,7 +30,7 @@ Response body: application/json
 
 Here's an example of how to use to use the /predict endpoint.
 
-```
+```python
 import requests
 from PIL import Image
 import numpy as np
@@ -54,12 +54,12 @@ If you want to send a tensor or a numpy array in the request, you need to turn i
 The output of the model will be in the response JSON body under the "output" field.
 
 Sample response format:
-```
+```python
 response = {"output": (your numpy array as a list here)}
 ```
 
 ## Documentation
-```
+```python
 torch_deploy.deploy(
     model: nn.Module,
     pre: Union[List[Callable], Callable] = None,
