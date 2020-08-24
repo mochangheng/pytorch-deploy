@@ -3,7 +3,7 @@ from PIL import Image
 import numpy as np
 from torchvision import transforms
 
-im = Image.open('palm.jpg')
+im = Image.open('../palm.jpg')
 resize = transforms.Resize(224)
 to_tensor = transforms.ToTensor()
 normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],

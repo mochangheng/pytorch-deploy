@@ -120,14 +120,12 @@ def predict_image(request: Request, file: UploadFile = File(...)):
     Output: The output of the model after being run through the postprocessing
             functions.
     '''
-    im = Image.open(file.file)
-    inp = transforms.ToTensor()(im)
+    inp = Image.open(file.file)
 
     # Logging
     client_host = request.client.host
     logger.log(f'[{datetime.now()}] Received input of size {sys.getsizeof(inp)} from {client_host}')
 
     # Change the shape so it fits Conv2d
-    inp = torch.unsqueeze(inp, 0)
     output = run_model(inp)
     return {"output": output}

@@ -6,7 +6,7 @@ To install:
 pip install pytorch-deploy
 ```
 
-Requirement: `torch` and `torchvision`
+You also have to install `torch` and `torchvision`. You can do so [here](https://pytorch.org/get-started/locally/).
 
 ## Usage
 Deploying a pretrained ResNet-18:
@@ -85,11 +85,11 @@ Easily converts a pytorch model to API for production usage.
 - `logfile`: Filename to create a file that stores date, ip address, and size of input for each access of the API. If `None`, no file will be created.
 - `inference_fn`: Name of the method of the model that should be called for the inputs. If `None`, the model itself will be called (If `model` is a `nn.Module` then it's equivalent to calling `model.forward(inputs)`).
 
+## Examples
+There are some examples in the examples/ directory.
+
 ## Currently In Progress
 Still working on an OAuth2 login system that requires correct user credentials to use torch-deploy.
 
-## Testing
-Run `python test_server.py` first and then `python test_client.py` in another window to test.
-
 ## Dependencies
-`torch, torchvision, fastapi[all], requests, numpy, pydantic`
+`torch, torchvision, fastapi, uvicorn, requests, numpy, pydantic`
