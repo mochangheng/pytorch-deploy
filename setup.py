@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="pytorch-deploy", # Replace with your own username
-    version="0.0.2",
+    version="0.0.5",
     author="Owen Mo, Fiona Xie, Hulbert Zhang",
     author_email="mochangheng@gmail.com, fionax@andrew.cmu.edu, hzeng012@ucr.edu",
     description="Serving pytorch models on an API in one line.",
@@ -20,7 +20,9 @@ setuptools.setup(
     ],
     install_requires=[
         "uvicorn",
-        "fastapi"
+        "fastapi",
+        "pydantic",
+        "requests"
     ],
     python_requires='>=3.6',
 )
