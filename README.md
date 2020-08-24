@@ -1,5 +1,13 @@
 # torch-deploy
 
+## Installation
+To install:
+```
+pip install pytorch-deploy
+```
+
+Requirement: `torch` and `torchvision`
+
 ## Usage
 Deploying a pretrained ResNet-18:
 ```
@@ -76,10 +84,6 @@ Easily converts a pytorch model to API for production usage.
 - `ssl_keyfile`, `ssl_certfile`, `ssl_ca_certs`: SSL configurations that are passed to uvicorn
 - `logfile`: Filename to create a file that stores date, ip address, and size of input for each access of the API. If `None`, no file will be created.
 - `inference_fn`: Name of the method of the model that should be called for the inputs. If `None`, the model itself will be called (If `model` is a `nn.Module` then it's equivalent to calling `model.forward(inputs)`).
-
-## Sample Response Format
-
-## Sample Code
 
 ## Testing
 Run `python test_server.py` first and then `python test_client.py` in another window to test.
