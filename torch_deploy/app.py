@@ -15,15 +15,17 @@ import sys
 
 from .logger import Logger
 
-app = FastAPI()
+app = FastAPI(
+    title="torch-deploy",
+    description="one line deployment for pytorch models"
+)
 config = None
 inference_fn = None
 pre = []
 post = []
 logger = None
 
-templates = Jinja2Templates(directory="torch_deploy/templates")
-
+templates = Jinja2Templates(directory=os.path.join(os.path.dirname(__file__), "templates"))
 @atexit.register
 def cleanup():
     if logger is not None:
