@@ -2,6 +2,7 @@ from getpass import getpass
 import requests
 
 def get_token():
+    print("To use torch-deploy, please enter the correct credentials")
     username = input("Enter your username: ")
     password = getpass("Enter your password: ")
 
