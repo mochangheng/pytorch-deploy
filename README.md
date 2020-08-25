@@ -112,10 +112,7 @@ There are some sample code in the examples/ directory.
 
 ## Currently In Progress
 We are still working on an OAuth2 login system that requires correct user credentials to use torch-deploy with secure password encryption and temporary JWT tokens. Here is an example of the code in the features_in_progress/ directory
-'''python
-from getpass import getpass
-import requests
-
+```python
 def get_token():
     print("To use torch-deploy, please enter the correct credentials")
     username = input("Enter your username: ")
@@ -130,7 +127,7 @@ def get_token():
     headers = {'Content-Type': 'application/x-www-form-urlencoded'}
     token = requests.post("http://127.0.0.1:8000/token", data=payload, headers=headers)
     return token.json()
-'''
+```
 
 ## Dependencies
 `torch, torchvision, fastapi, uvicorn, requests, numpy, pydantic`
