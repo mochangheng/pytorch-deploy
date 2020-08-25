@@ -1,5 +1,4 @@
 import requests
-import numpy as np
 
 filename = "../palm.jpg"
 files = {'file': open(filename, "rb")}
