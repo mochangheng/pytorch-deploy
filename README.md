@@ -24,6 +24,8 @@ The default host and port is 0.0.0.0:8000.
 
 ## Endpoints
 
+You can access the docs for the endpoints at "host:port/docs" after running `python server.py`.
+
 ### /predict
 Request body: application/json <br>
 Response body: application/json
@@ -58,6 +60,26 @@ Sample response format:
 response = {"output": (your numpy array as a list here)}
 ```
 
+### /predict_image
+Request body: multipart/form-data <br>
+Response body: application/json
+
+Here's an example of how to use to use the /predict_image endpoint.
+
+```python
+import requests
+import numpy as np
+
+filename = "../palm.jpg"
+files = {'file': open(filename, "rb")}
+r = requests.post("http://127.0.0.1:8000/predict_image", files=files)
+response = r.json()
+output = np.array(response["output"])
+print(np.argmax(output))
+```
+
+The file is uploaded with the content type "multipart/form-data". This requires minimal work on the client side and is compatible with standard file upload requests.
+
 ## Documentation
 ```python
 torch_deploy.deploy(
@@ -86,7 +108,7 @@ Easily converts a pytorch model to API for production usage.
 - `inference_fn`: Name of the method of the model that should be called for the inputs. If `None`, the model itself will be called (If `model` is a `nn.Module` then it's equivalent to calling `model.forward(inputs)`).
 
 ## Examples
-There are some examples in the examples/ directory.
+There are some sample code in the examples/ directory.
 
 ## Currently In Progress
 Still working on an OAuth2 login system that requires correct user credentials to use torch-deploy.
